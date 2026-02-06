@@ -1,114 +1,51 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Smart Plant Monitor</title>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<style>
-body{
-  font-family:Arial;
-  background:#111;
-  color:white;
-  text-align:center;
-}
-.card{
-  background:#1e1e1e;
-  padding:20px;
-  margin:15px auto;
-  width:300px;
-  border-radius:15px;
-}
-.big{
-  font-size:30px;
-  font-weight:bold;
-}
-button{
-  padding:12px 20px;
-  margin:10px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
-}
-.on{background:#00c853;color:white;}
-.off{background:#d50000;color:white;}
-</style>
-
 </head>
+
 <body>
 
 <h2>🌱 Smart Plant Monitor</h2>
 
-<div class="card">
-<h3>💧 Soil Moisture</h3>
-<div id="soil" class="big">-- %</div>
-</div>
+<p>Temperature: <span id="temp">0</span></p>
+<p>Humidity: <span id="humi">0</span></p>
 
-<div class="card">
-<h3>🌡 Temperature</h3>
-<div id="temp" class="big">-- °C</div>
-</div>
+<script type="module">
 
-<div class="card">
-<h3>🚨 Alarm Status</h3>
-<div id="alarm" class="big">--</div>
-</div>
+// 🔥 Firebase SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-<div class="card">
-<h3>🎛 Control</h3>
-<button class="on" onclick="setAlarm(true)">🔔 เปิด Alarm</button>
-<button class="off" onclick="setAlarm(false)">🔕 ปิด Alarm</button>
-</div>
-
-<script>
-
-var firebaseConfig = {
-  apiKey: "AIzaSyDZIwpGy6Zz4pLhejIAfP-EaBKUyXgJwc",
+// 🔥 Firebase Config (ของคุณ)
+const firebaseConfig = {
+  apiKey: "AIzaSyD2IwpGy6Zz4pLhejiAFP-EAeBKUyXgJwc",
   authDomain: "kjszz-1a818.firebaseapp.com",
   databaseURL: "https://kjszz-1a818-default-rtdb.firebaseio.com",
   projectId: "kjszz-1a818",
   storageBucket: "kjszz-1a818.firebasestorage.app",
   messagingSenderId: "1056726378754",
-  appId: "1:1056726378754:web:fe6ae2b60dcda89783a1b"
+  appId: "1:1056726378754:web:feae6e2b60dcda89783a1b",
+  measurementId: "G-S1WLLDNQ15"
 };
 
-firebase.initializeApp(firebaseConfig);
+// 🔥 เริ่ม Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-var db = firebase.database();
-let ready=false;
+// 🔥 path database
+const dataRef = ref(db, "sensor");
 
-/* login */
-firebase.auth().signInAnonymously()
-.then(()=>{
-  console.log("login success");
-  ready=true;
-  startRealtime();
-})
-.catch((error)=>{
-  console.log(error);
+// 🔥 realtime listener
+onValue(dataRef, (snapshot) => {
+
+  const data = snapshot.val();
+
+  document.getElementById("temp").innerText = data.temperature;
+  document.getElementById("humi").innerText = data.humidity;
+
 });
-
-/* realtime */
-function startRealtime(){
-  db.ref("/sensor").on("value",(snap)=>{
-    let d=snap.val();
-    if(!d)return;
-
-    document.getElementById("soil").innerHTML=d.soil+" %";
-    document.getElementById("temp").innerHTML=d.temperature+" °C";
-    document.getElementById("alarm").innerHTML=d.alarm?"ON":"OFF";
-  });
-}
-
-/* control */
-function setAlarm(state){
-  if(!ready) return alert("Firebase ยังไม่ login");
-  db.ref("/control/enable").set(state);
-}
 
 </script>
 
