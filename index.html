@@ -5,8 +5,8 @@
 <title>ESP8266 Smart Sensor</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
 body{font-family:Arial;background:#111;color:white;text-align:center;}
@@ -36,7 +36,9 @@ button{padding:10px 20px;margin:5px;border:none;border-radius:10px;font-size:16p
 
 var firebaseConfig={
 apiKey:"AIzaSyC1a-XkNqLQ-fR9K9G3rRq4H3k9SKw9EF0",
-databaseURL:"https://kjszz-1a818-default-rtdb.firebaseio.com/"
+authDomain:"kjszz-1a818.firebaseapp.com",
+databaseURL:"https://kjszz-1a818-default-rtdb.firebaseio.com",
+projectId:"kjszz-1a818"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -49,6 +51,7 @@ firebase.auth().signInAnonymously()
 .then(()=>{
 console.log("login success");
 ready=true;
+startRealtime();   // ⭐ เริ่มอ่านค่าหลัง login
 })
 .catch((e)=>{
 alert("Firebase login error");
@@ -67,6 +70,7 @@ db.ref("/control/enable").set(false);
 }
 
 /* realtime */
+function startRealtime(){
 db.ref("/sensor").on("value",(snap)=>{
 let d=snap.val();
 if(!d)return;
@@ -75,6 +79,7 @@ document.getElementById("soil").innerHTML=d.soil+" %";
 document.getElementById("temp").innerHTML=d.temperature+" °C";
 document.getElementById("alarm").innerHTML=d.alarm?"ON":"OFF";
 });
+}
 
 </script>
 </body>
