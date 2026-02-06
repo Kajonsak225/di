@@ -2,116 +2,99 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ESP8266 Smart Monitor</title>
+<title>ESP8266 Smart Sensor</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
 body{
-  font-family:sans-serif;
+  font-family: Arial;
   background:#111;
   color:white;
   text-align:center;
 }
-.container{
-  max-width:500px;
-  margin:auto;
-  padding:20px;
-}
 .card{
-  background:#222;
-  margin:15px 0;
+  background:#1e1e1e;
   padding:20px;
+  margin:15px auto;
+  width:300px;
   border-radius:15px;
 }
-.value{
-  font-size:40px;
-  font-weight:bold;
-}
 button{
-  font-size:18px;
-  padding:12px 25px;
-  margin:10px;
+  padding:10px 20px;
+  margin:5px;
   border:none;
   border-radius:10px;
+  font-size:16px;
   cursor:pointer;
 }
-.on{background:#e74c3c;}
-.off{background:#2ecc71;}
-.alarmOn{color:#ff4444;font-size:22px;}
-.alarmOff{color:#2ecc71;font-size:22px;}
+.on{background:#00c853;color:white;}
+.off{background:#d50000;color:white;}
+.big{font-size:30px;font-weight:bold;}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
-<h1>🌱 ESP8266 Smart Sensor</h1>
+<h2>🌱 Smart Plant Monitor</h2>
 
 <div class="card">
-<h3>💧 ความชื้นดิน</h3>
-<div id="soil" class="value">-- %</div>
+<h3>💧 Soil</h3>
+<div id="soil" class="big">-- %</div>
 </div>
 
 <div class="card">
-<h3>🌡️ อุณหภูมิ</h3>
-<div id="temp" class="value">-- °C</div>
+<h3>🌡 Temperature</h3>
+<div id="temp" class="big">-- °C</div>
 </div>
 
 <div class="card">
-<h3>🚨 สถานะ Alarm</h3>
-<div id="alarm" class="alarmOff">-</div>
+<h3>🚨 Alarm Status</h3>
+<div id="alarm" class="big">--</div>
 </div>
 
 <div class="card">
-<h3>🔔 ควบคุม Buzzer</h3>
-<button class="on" onclick="setAlarm(true)">เปิดเสียง</button>
-<button class="off" onclick="setAlarm(false)">ปิดเสียง</button>
-</div>
-
+<h3>🎛 Control</h3>
+<button class="on" onclick="alarmOn()">🔊 เปิด Alarm</button>
+<button class="off" onclick="alarmOff()">🔇 ปิด Alarm</button>
 </div>
 
 <script>
 
-/* ===== Firebase Config ===== */
+/* ===== firebase config ===== */
 var firebaseConfig = {
-  apiKey: "AIzaSyC1a-XkNqLQ-fR9K9G3rRq4H3k9SKw9EF0",
-  databaseURL: "https://kjszz-1a818-default-rtdb.firebaseio.com/"
+apiKey: "AIzaSyC1a-XkNqLQ-fR9K9G3rRq4H3k9SKw9EF0",
+databaseURL: "https://kjszz-1a818-default-rtdb.firebaseio.com/"
 };
 
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
-/* ===== READ SENSOR REALTIME ===== */
+/* ===== realtime sensor ===== */
+db.ref("/sensor").on("value", function(snapshot){
 
-db.ref("/sensor/soil").on("value",snap=>{
- document.getElementById("soil").innerText =
- (snap.val() ?? "--") + " %";
+var data = snapshot.val();
+if(!data) return;
+
+document.getElementById("soil").innerText =
+data.soil + " %";
+
+document.getElementById("temp").innerText =
+data.temperature.toFixed(1) + " °C";
+
+document.getElementById("alarm").innerText =
+data.alarm ? "🔴 ALARM ON" : "🟢 NORMAL";
+
 });
 
-db.ref("/sensor/temperature").on("value",snap=>{
- document.getElementById("temp").innerText =
- (snap.val() ?? "--") + " °C";
-});
+/* ===== control ===== */
+function alarmOn(){
+db.ref("/control/enable").set(true);
+}
 
-db.ref("/sensor/alarm").on("value",snap=>{
- let state = snap.val();
- let el = document.getElementById("alarm");
-
- if(state){
-   el.innerText="🔴 Alarm ทำงาน";
-   el.className="alarmOn";
- }else{
-   el.innerText="🟢 ปกติ";
-   el.className="alarmOff";
- }
-});
-
-/* ===== CONTROL ===== */
-function setAlarm(state){
- db.ref("/control/enable").set(state);
+function alarmOff(){
+db.ref("/control/enable").set(false);
 }
 
 </script>
