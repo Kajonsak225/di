@@ -6,6 +6,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
 <style>
 body{
@@ -62,42 +63,48 @@ button{
 
 <script>
 
-/* ===== firebase config ===== */
-var firebaseConfig = {
-apiKey: "AIzaSyC1a-XkNqLQ-fR9K9G3rRq4H3k9SKw9EF0",
-databaseURL: "https://kjszz-1a818-default-rtdb.firebaseio.com/"
+var firebaseConfig={
+apiKey:"AIzaSyC1a-XkNqLQ-fR9K9G3rRq4H3k9SKw9EF0",
+databaseURL:"https://kjszz-1a818-default-rtdb.firebaseio.com/"
 };
 
 firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
+var db=firebase.database();
 
-/* ===== realtime sensor ===== */
-db.ref("/sensor").on("value", function(snapshot){
+let ready=false;
 
-var data = snapshot.val();
-if(!data) return;
-
-document.getElementById("soil").innerText =
-data.soil + " %";
-
-document.getElementById("temp").innerText =
-data.temperature.toFixed(1) + " °C";
-
-document.getElementById("alarm").innerText =
-data.alarm ? "🔴 ALARM ON" : "🟢 NORMAL";
-
+/* login firebase */
+firebase.auth().signInAnonymously()
+.then(()=>{
+console.log("login success");
+ready=true;
+})
+.catch((e)=>{
+alert("Firebase login error");
+console.log(e);
 });
 
-/* ===== control ===== */
+/* control */
 function alarmOn(){
+if(!ready)return alert("Firebase ยังไม่ login");
 db.ref("/control/enable").set(true);
 }
 
 function alarmOff(){
+if(!ready)return alert("Firebase ยังไม่ login");
 db.ref("/control/enable").set(false);
 }
 
-</script>
+/* realtime sensor */
+db.ref("/sensor").on("value",(snap)=>{
+let d=snap.val();
+if(!d)return;
 
+document.getElementById("soil").innerHTML=d.soil+" %";
+document.getElementById("temp").innerHTML=d.temperature+" °C";
+document.getElementById("alarm").innerHTML=d.alarm?"ON":"OFF";
+});
+
+</script>
 </body>
 </html>
