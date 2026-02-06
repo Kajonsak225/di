@@ -2,54 +2,80 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ESP8266 Alarm Control</title>
+<title>ESP8266 Smart Monitor</title>
 
-<!-- Firebase v8 (เข้ากับที่คุณใช้) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
 body{
-  font-family: sans-serif;
+  font-family:sans-serif;
   background:#111;
   color:white;
   text-align:center;
-  padding-top:80px;
+}
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
+.card{
+  background:#222;
+  margin:15px 0;
+  padding:20px;
+  border-radius:15px;
+}
+.value{
+  font-size:40px;
+  font-weight:bold;
 }
 button{
-  font-size:22px;
-  padding:15px 30px;
+  font-size:18px;
+  padding:12px 25px;
+  margin:10px;
   border:none;
   border-radius:10px;
-  margin:10px;
   cursor:pointer;
 }
 .on{background:#e74c3c;}
 .off{background:#2ecc71;}
-.card{
-  background:#222;
-  padding:40px;
-  width:300px;
-  margin:auto;
-  border-radius:15px;
-}
+.alarmOn{color:#ff4444;font-size:22px;}
+.alarmOff{color:#2ecc71;font-size:22px;}
 </style>
 </head>
 
 <body>
 
-<div class="card">
-<h2>🔔 ควบคุม Buzzer</h2>
+<div class="container">
 
+<h1>🌱 ESP8266 Smart Sensor</h1>
+
+<div class="card">
+<h3>💧 ความชื้นดิน</h3>
+<div id="soil" class="value">-- %</div>
+</div>
+
+<div class="card">
+<h3>🌡️ อุณหภูมิ</h3>
+<div id="temp" class="value">-- °C</div>
+</div>
+
+<div class="card">
+<h3>🚨 สถานะ Alarm</h3>
+<div id="alarm" class="alarmOff">-</div>
+</div>
+
+<div class="card">
+<h3>🔔 ควบคุม Buzzer</h3>
 <button class="on" onclick="setAlarm(true)">เปิดเสียง</button>
 <button class="off" onclick="setAlarm(false)">ปิดเสียง</button>
+</div>
 
-<p id="status">สถานะ: -</p>
 </div>
 
 <script>
 
-/* ===== Firebase Config (ใส่ของโปรเจคคุณ) ===== */
+/* ===== Firebase Config ===== */
 var firebaseConfig = {
   apiKey: "AIzaSyC1a-XkNqLQ-fR9K9G3rRq4H3k9SKw9EF0",
   databaseURL: "https://kjszz-1a818-default-rtdb.firebaseio.com/"
@@ -58,16 +84,35 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
-/* ===== ส่งคำสั่ง ===== */
-function setAlarm(state){
-  db.ref("/control/enable").set(state);
-}
+/* ===== READ SENSOR REALTIME ===== */
 
-/* ===== อ่านสถานะ realtime ===== */
-db.ref("/control/enable").on("value",function(snapshot){
-  document.getElementById("status").innerText =
-  "สถานะ: " + (snapshot.val() ? "🔴 เปิดอยู่" : "🟢 ปิดอยู่");
+db.ref("/sensor/soil").on("value",snap=>{
+ document.getElementById("soil").innerText =
+ (snap.val() ?? "--") + " %";
 });
+
+db.ref("/sensor/temperature").on("value",snap=>{
+ document.getElementById("temp").innerText =
+ (snap.val() ?? "--") + " °C";
+});
+
+db.ref("/sensor/alarm").on("value",snap=>{
+ let state = snap.val();
+ let el = document.getElementById("alarm");
+
+ if(state){
+   el.innerText="🔴 Alarm ทำงาน";
+   el.className="alarmOn";
+ }else{
+   el.innerText="🟢 ปกติ";
+   el.className="alarmOff";
+ }
+});
+
+/* ===== CONTROL ===== */
+function setAlarm(state){
+ db.ref("/control/enable").set(state);
+}
 
 </script>
 
