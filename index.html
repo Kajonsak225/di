@@ -9,27 +9,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
 <style>
-body{
-  font-family: Arial;
-  background:#111;
-  color:white;
-  text-align:center;
-}
-.card{
-  background:#1e1e1e;
-  padding:20px;
-  margin:15px auto;
-  width:300px;
-  border-radius:15px;
-}
-button{
-  padding:10px 20px;
-  margin:5px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
-}
+body{font-family:Arial;background:#111;color:white;text-align:center;}
+.card{background:#1e1e1e;padding:20px;margin:15px auto;width:300px;border-radius:15px;}
+button{padding:10px 20px;margin:5px;border:none;border-radius:10px;font-size:16px;cursor:pointer;}
 .on{background:#00c853;color:white;}
 .off{background:#d50000;color:white;}
 .big{font-size:30px;font-weight:bold;}
@@ -40,20 +22,9 @@ button{
 
 <h2>🌱 Smart Plant Monitor</h2>
 
-<div class="card">
-<h3>💧 Soil</h3>
-<div id="soil" class="big">-- %</div>
-</div>
-
-<div class="card">
-<h3>🌡 Temperature</h3>
-<div id="temp" class="big">-- °C</div>
-</div>
-
-<div class="card">
-<h3>🚨 Alarm Status</h3>
-<div id="alarm" class="big">--</div>
-</div>
+<div class="card"><h3>💧 Soil</h3><div id="soil" class="big">-- %</div></div>
+<div class="card"><h3>🌡 Temperature</h3><div id="temp" class="big">-- °C</div></div>
+<div class="card"><h3>🚨 Alarm Status</h3><div id="alarm" class="big">--</div></div>
 
 <div class="card">
 <h3>🎛 Control</h3>
@@ -73,7 +44,7 @@ var db=firebase.database();
 
 let ready=false;
 
-/* login firebase */
+/* ⭐ login */
 firebase.auth().signInAnonymously()
 .then(()=>{
 console.log("login success");
@@ -95,7 +66,7 @@ if(!ready)return alert("Firebase ยังไม่ login");
 db.ref("/control/enable").set(false);
 }
 
-/* realtime sensor */
+/* realtime */
 db.ref("/sensor").on("value",(snap)=>{
 let d=snap.val();
 if(!d)return;
