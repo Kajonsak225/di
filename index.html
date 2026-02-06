@@ -2,89 +2,115 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ESP8266 Smart Sensor</title>
+<title>Smart Plant Monitor</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-body{font-family:Arial;background:#111;color:white;text-align:center;}
-.card{background:#1e1e1e;padding:20px;margin:15px auto;width:300px;border-radius:15px;}
-button{padding:10px 20px;margin:5px;border:none;border-radius:10px;font-size:16px;cursor:pointer;}
+body{
+  font-family:Arial;
+  background:#111;
+  color:white;
+  text-align:center;
+}
+.card{
+  background:#1e1e1e;
+  padding:20px;
+  margin:15px auto;
+  width:300px;
+  border-radius:15px;
+}
+.big{
+  font-size:30px;
+  font-weight:bold;
+}
+button{
+  padding:12px 20px;
+  margin:10px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
 .on{background:#00c853;color:white;}
 .off{background:#d50000;color:white;}
-.big{font-size:30px;font-weight:bold;}
 </style>
-</head>
 
+</head>
 <body>
 
 <h2>🌱 Smart Plant Monitor</h2>
 
-<div class="card"><h3>💧 Soil</h3><div id="soil" class="big">-- %</div></div>
-<div class="card"><h3>🌡 Temperature</h3><div id="temp" class="big">-- °C</div></div>
-<div class="card"><h3>🚨 Alarm Status</h3><div id="alarm" class="big">--</div></div>
+<div class="card">
+<h3>💧 Soil Moisture</h3>
+<div id="soil" class="big">-- %</div>
+</div>
+
+<div class="card">
+<h3>🌡 Temperature</h3>
+<div id="temp" class="big">-- °C</div>
+</div>
+
+<div class="card">
+<h3>🚨 Alarm Status</h3>
+<div id="alarm" class="big">--</div>
+</div>
 
 <div class="card">
 <h3>🎛 Control</h3>
-<button class="on" onclick="alarmOn()">🔊 เปิด Alarm</button>
-<button class="off" onclick="alarmOff()">🔇 ปิด Alarm</button>
+<button class="on" onclick="setAlarm(true)">🔔 เปิด Alarm</button>
+<button class="off" onclick="setAlarm(false)">🔕 ปิด Alarm</button>
 </div>
 
 <script>
 
 var firebaseConfig = {
-  apiKey: "AIzaSyD2IwpGy6Zz4pLhejIAfP-EAeBKUyXgJwc",
+  apiKey: "AIzaSyDZIwpGy6Zz4pLhejIAfP-EaBKUyXgJwc",
   authDomain: "kjszz-1a818.firebaseapp.com",
   databaseURL: "https://kjszz-1a818-default-rtdb.firebaseio.com",
   projectId: "kjszz-1a818",
   storageBucket: "kjszz-1a818.firebasestorage.app",
   messagingSenderId: "1056726378754",
-  appId: "1:1056726378754:web:fea6ee2b60dcda89783a1b"
+  appId: "1:1056726378754:web:fe6ae2b60dcda89783a1b"
 };
 
-
 firebase.initializeApp(firebaseConfig);
-var db=firebase.database();
 
+var db = firebase.database();
 let ready=false;
 
-/* ⭐ login */
+/* login */
 firebase.auth().signInAnonymously()
 .then(()=>{
-console.log("login success");
-ready=true;
-startRealtime();   // ⭐ เริ่มอ่านค่าหลัง login
+  console.log("login success");
+  ready=true;
+  startRealtime();
 })
-.catch((e)=>{
-alert("Firebase login error");
-console.log(e);
+.catch((error)=>{
+  console.log(error);
 });
-
-/* control */
-function alarmOn(){
-if(!ready)return alert("Firebase ยังไม่ login");
-db.ref("/control/enable").set(true);
-}
-
-function alarmOff(){
-if(!ready)return alert("Firebase ยังไม่ login");
-db.ref("/control/enable").set(false);
-}
 
 /* realtime */
 function startRealtime(){
-db.ref("/sensor").on("value",(snap)=>{
-let d=snap.val();
-if(!d)return;
+  db.ref("/sensor").on("value",(snap)=>{
+    let d=snap.val();
+    if(!d)return;
 
-document.getElementById("soil").innerHTML=d.soil+" %";
-document.getElementById("temp").innerHTML=d.temperature+" °C";
-document.getElementById("alarm").innerHTML=d.alarm?"ON":"OFF";
-});
+    document.getElementById("soil").innerHTML=d.soil+" %";
+    document.getElementById("temp").innerHTML=d.temperature+" °C";
+    document.getElementById("alarm").innerHTML=d.alarm?"ON":"OFF";
+  });
+}
+
+/* control */
+function setAlarm(state){
+  if(!ready) return alert("Firebase ยังไม่ login");
+  db.ref("/control/enable").set(state);
 }
 
 </script>
+
 </body>
 </html>
