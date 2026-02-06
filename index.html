@@ -3,49 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <title>Smart Plant Monitor</title>
+
+<style>
+body{
+  font-family:sans-serif;
+  background:#111;
+  color:white;
+  text-align:center;
+}
+.card{
+  background:#1c1c1c;
+  padding:20px;
+  margin:15px;
+  border-radius:12px;
+}
+button{
+  padding:12px 20px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+}
+.on{background:#00c853;color:white;}
+.off{background:red;color:white;}
+.online{color:#00ff88;}
+.offline{color:red;}
+</style>
 </head>
 
 <body>
 
 <h2>🌱 Smart Plant Monitor</h2>
 
-<p>Temperature: <span id="temp">0</span></p>
-<p>Humidity: <span id="humi">0</span></p>
+<div class="card">
+<h3>🌡 Temperature</h3>
+<p id="temp">--</p>
+</div>
+
+<div class="card">
+<h3>💧 Humidity</h3>
+<p id="humi">--</p>
+</div>
+
+<div class="card">
+<h3>📡 Sensor Status</h3>
+<p id="status">กำลังเชื่อมต่อ...</p>
+</div>
+
+<div class="card">
+<h3>🔊 Buzzer Control</h3>
+<button class="on" onclick="turnOn()">เปิดเสียง</button>
+<button class="off" onclick="turnOff()">ปิดเสียง</button>
+</div>
 
 <script type="module">
 
-// 🔥 Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, set } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// 🔥 Firebase Config (ของคุณ)
 const firebaseConfig = {
-  apiKey: "AIzaSyD2IwpGy6Zz4pLhejiAFP-EAeBKUyXgJwc",
+  apiKey: "AIzaSyDZIwpGy6Zz4pLhejIAfP-EaBKUyXgJwc",
   authDomain: "kjszz-1a818.firebaseapp.com",
   databaseURL: "https://kjszz-1a818-default-rtdb.firebaseio.com",
   projectId: "kjszz-1a818",
   storageBucket: "kjszz-1a818.firebasestorage.app",
   messagingSenderId: "1056726378754",
-  appId: "1:1056726378754:web:feae6e2b60dcda89783a1b",
+  appId: "1:1056726378754:web:fea6e2b60dcda89783a1b",
   measurementId: "G-S1WLLDNQ15"
 };
 
-// 🔥 เริ่ม Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 🔥 path database
-const dataRef = ref(db, "sensor");
-
-// 🔥 realtime listener
-onValue(dataRef, (snapshot) => {
-
-  const data = snapshot.val();
-
-  document.getElementById("temp").innerText = data.temperature;
-  document.getElementById("humi").innerText = data.humidity;
-
+/* ===== realtime sensor ===== */
+onValue(ref(db,"sensor/temp"),snap=>{
+  document.getElementById("temp").innerText =
+  snap.val()+" °C";
 });
+
+onValue(ref(db,"sensor/humi"),snap=>{
+  document.getElementById("humi").innerText =
+  snap.val()+" %";
+});
+
+/* ===== status online ===== */
+onValue(ref(db,"sensor/status"),snap=>{
+  if(snap.val()==="online"){
+    document.getElementById("status").innerHTML =
+    "<span class='online'>ออนไลน์</span>";
+  }else{
+    document.getElementById("status").innerHTML =
+    "<span class='offline'>ออฟไลน์</span>";
+  }
+});
+
+/* ===== buzzer control ===== */
+window.turnOn=function(){
+  set(ref(db,"buzzer"),1);
+}
+
+window.turnOff=function(){
+  set(ref(db,"buzzer"),0);
+}
 
 </script>
 
